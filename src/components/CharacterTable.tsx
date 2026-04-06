@@ -8,8 +8,8 @@ interface CharacterTableProps {
 }
 
 /**
- * テニスの王子様キャラクター一覧表示テーブル
- * デジタル庁ダッシュボードデザインガイドラインに準拠した設計
+ * テニスの王子様キャラクター一覧表示
+ * PC: テーブル表示 / SP: カード表示 に切り替え
  */
 export default function CharacterTable({ characters, userProfile }: CharacterTableProps) {
   const renderAgeDiff = (charAge: number) => {
@@ -24,7 +24,8 @@ export default function CharacterTable({ characters, userProfile }: CharacterTab
 
   return (
     <div className="w-full h-full overflow-auto border border-brand-100 rounded-lg shadow-sm bg-white">
-      <table className="w-full text-sm text-left border-collapse">
+      {/* ===== PC: テーブルビュー ===== */}
+      <table className="w-full text-sm text-left border-collapse hidden md:table">
         <thead className="sticky top-0 bg-brand-500 text-white z-10">
           <tr>
             <th className="px-4 py-3 font-bold border-b border-brand-400">名前</th>
@@ -64,7 +65,7 @@ export default function CharacterTable({ characters, userProfile }: CharacterTab
             </td>
           </tr>
 
-          {characters.map((char, index) => (
+          {characters.map((char) => (
             <tr 
               key={`${char.name}-${char.school}`} 
               className="hover:bg-brand-50 transition-colors even:bg-brand-100/10"
@@ -89,10 +90,63 @@ export default function CharacterTable({ characters, userProfile }: CharacterTab
           ))}
         </tbody>
       </table>
+
+      {/* ===== SP: カードビュー ===== */}
+      <div className="md:hidden flex flex-col gap-2.5 p-3">
+        {/* ユーザーカード */}
+        <div className="bg-yellow-50 border-l-4 border-yellow-400 rounded-lg p-3 shadow-sm">
+          <div className="flex justify-between items-start mb-2">
+            <span className="font-bold text-yellow-800 flex items-center gap-1">
+              <span className="text-lg leading-none">👤</span> あなた
+            </span>
+            <span className="text-yellow-900 font-bold text-lg">{userProfile.age ? `${userProfile.age}歳` : '--'}</span>
+          </div>
+          <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-xs text-yellow-800">
+            <span>学校: {userProfile.school || '--'}</span>
+            <span>学年: {userProfile.grade || '--'}</span>
+            <span>身長: {userProfile.height ? `${userProfile.height}cm` : '--'}</span>
+            <span>体重: {userProfile.weight ? `${userProfile.weight}kg` : '--'}</span>
+            <span>血液型: {userProfile.bloodType ? `${userProfile.bloodType}型` : '--'}</span>
+            <span>利き腕: {userProfile.dominantArm ? `${userProfile.dominantArm}手` : '--'}</span>
+          </div>
+          {familyString && (
+            <div className="text-xs text-yellow-700 mt-1.5 pt-1.5 border-t border-yellow-200">
+              家族: {familyString}
+            </div>
+          )}
+        </div>
+
+        {/* キャラクターカード */}
+        {characters.map((char) => (
+          <div
+            key={`card-${char.name}-${char.school}`}
+            className="bg-white border border-brand-100 rounded-lg p-3 hover:border-brand-300 transition-colors"
+          >
+            <div className="flex justify-between items-start mb-1.5">
+              <div className="flex flex-col">
+                <span className="font-bold text-gray-900 text-sm">{char.name}</span>
+                <span className="text-[11px] text-gray-500">{char.school} / {char.grade}</span>
+              </div>
+              <div className="flex flex-col items-end gap-0.5">
+                <span className="text-brand-500 font-bold text-base">{char.ageCurrent}歳</span>
+                {userProfile.age !== null && (
+                  <span className="text-[11px]">{renderAgeDiff(char.ageCurrent)}</span>
+                )}
+              </div>
+            </div>
+            <div className="grid grid-cols-3 gap-x-2 gap-y-0.5 text-[11px] text-gray-500 pt-1.5 border-t border-gray-100">
+              <span>{char.height ? `${char.height}cm` : '--'}</span>
+              <span>{char.weight ? `${char.weight}kg` : '--'}</span>
+              <span>{char.bloodType}型 / {char.dominantArm}手</span>
+            </div>
+          </div>
+        ))}
+      </div>
+
       {characters.length === 0 && (
-        <div className="p-12 text-center flex flex-col items-center justify-center h-full">
-          <span className="text-gray-300 text-4xl mb-4 italic font-bold">No Data</span>
-          <p className="text-gray-400">条件に一致するキャラクターは存在しません</p>
+        <div className="p-8 sm:p-12 text-center flex flex-col items-center justify-center h-full">
+          <span className="text-gray-300 text-2xl sm:text-4xl mb-4 italic font-bold">No Data</span>
+          <p className="text-gray-400 text-sm">条件に一致するキャラクターは存在しません</p>
         </div>
       )}
     </div>

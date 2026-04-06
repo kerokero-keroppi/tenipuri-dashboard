@@ -21,7 +21,7 @@ interface ChartsProps {
 
 // カスタムラベルのためのコンポーネント (吹き出し)
 const CustomTooltipBadge = (props: any) => {
-  const { x, y, width, value } = props; // value is boolean (isUser)
+  const { x, y, width, value, viewBox } = props; // value is boolean (isUser)
   if (!value) return null;
   
   const radius = 4;
@@ -29,24 +29,30 @@ const CustomTooltipBadge = (props: any) => {
   const boxHeight = 22;
   const arrowSize = 5;
   
-  // Barの中央のX座標
+  // Barの中央のX座標（矢印はここから）
   const centerX = x + width / 2;
   // BoxTopのY座標 (Barの上)
   const boxY = y - boxHeight - arrowSize - 2;
+
+  // チャートの右端を超えないようにバッジのX位置をクランプ
+  const chartRight = viewBox ? viewBox.x + viewBox.width : Infinity;
+  const rawLeft = centerX - boxWidth / 2;
+  const clampedLeft = Math.min(rawLeft, chartRight - boxWidth);
+  const badgeCenterX = clampedLeft + boxWidth / 2;
   
   return (
     <g>
       {/* 吹き出しの背景 */}
       <rect
-        x={centerX - boxWidth / 2}
+        x={clampedLeft}
         y={boxY}
         width={boxWidth}
         height={boxHeight}
-        fill="#EF4444" // 赤 (アクセントカラー)
+        fill="#EF4444"
         rx={radius}
         ry={radius}
       />
-      {/* 吹き出しの矢印（下向きの三角形） */}
+      {/* 吹き出しの矢印（下向きの三角形）：常にbarの中央から */}
       <polygon
         points={`
           ${centerX - arrowSize},${boxY + boxHeight} 
@@ -57,7 +63,7 @@ const CustomTooltipBadge = (props: any) => {
       />
       {/* 吹き出しのテキスト */}
       <text
-        x={centerX}
+        x={badgeCenterX}
         y={boxY + boxHeight / 2 + 3}
         fill="#FFFFFF"
         textAnchor="middle"
@@ -127,16 +133,16 @@ export default function Charts({ characters, userAge }: ChartsProps) {
     <div className="flex flex-col gap-4 h-full">
       {/* 年齢分布を画面全体に表示 */}
       <div className="bg-white p-4 rounded-lg border border-brand-100 shadow-sm flex flex-col h-full w-full">
-        <h3 className="text-xs font-bold text-gray-700 mb-4 border-l-4 border-brand-400 pl-2 flex justify-between">
+        <h3 className="text-xs font-bold text-gray-700 mb-3 sm:mb-4 border-l-4 border-brand-400 pl-2 flex flex-col sm:flex-row sm:justify-between gap-1">
           <span>年齢分布（人）</span>
           {userAge !== null && userAge !== undefined && (
-            <span className="text-gray-400 font-normal">
+            <span className="text-gray-400 font-normal text-[10px] sm:text-xs">
               緑はキャラクター、赤はあなたの年齢
             </span>
           )}
         </h3>
-        <div className="flex-1 w-full min-h-[160px] pt-8"> {/* 吹き出しのために上部に余白を確保 */}
-          <ResponsiveContainer width="100%" height="100%">
+        <div className="w-full pt-6 sm:pt-8"> {/* 吹き出しのために上部に余白を確保 */}
+          <ResponsiveContainer width="100%" height={250}>
             <BarChart data={ageData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
               <CartesianGrid strokeDasharray="3 3" vertical={false} stroke={gridColor} />
               <XAxis

@@ -21,6 +21,7 @@ export default function Dashboard() {
     familyOther: ''
   });
   const [isProfileOpen, setIsProfileOpen] = useState(false);
+  const [filterOpen, setFilterOpen] = useState(false);
 
   // 定数の抽出
   const schools = useMemo(() => Array.from(new Set(characters.map(c => c.school))), []);
@@ -69,48 +70,67 @@ export default function Dashboard() {
     });
   };
 
+  // アクティブフィルター数
+  const activeFilterCount = filters.school.length + filters.grade.length + (filters.position !== 'all' ? 1 : 0);
+
   return (
-    <div className="w-full min-h-screen bg-dashboard-bg p-4 md:p-8 flex items-center justify-center">
-      {/* 16:9比率を意識したメインコンテナ */}
-      <div className="dashboard-container bg-white shadow-xl rounded-lg overflow-hidden border border-brand-200 grid grid-cols-6 grid-rows-6">
+    <div className="w-full lg:min-h-0 flex flex-col lg:items-center lg:justify-center flex-grow">
+      {/* メインコンテナ */}
+      <div className="dashboard-container bg-white shadow-xl lg:rounded-lg lg:overflow-hidden border border-brand-200 flex flex-col lg:grid lg:grid-cols-6 lg:grid-rows-[auto_1fr] flex-grow">
         
-        {/* Header Area (Row 1, Cols 1-6) */}
-        <header className="col-span-6 row-span-1 border-b border-brand-100 bg-brand-500 text-white p-4 flex items-center justify-between">
-          <div>
-            <h1 className="text-xl font-bold tracking-tight">テニプリ キャラクター年齢比較ダッシュボード</h1>
-            <p className="text-xs opacity-80">デジタル庁ダッシュボードデザイン 実践ガイドブック準拠</p>
+        {/* Header Area */}
+        <header className="lg:col-span-6 border-b border-brand-100 bg-brand-500 text-white p-3 sm:p-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 min-w-0">
+          <div className="min-w-0 w-full sm:w-auto">
+            <h1 className="text-sm sm:text-xl font-bold tracking-tight break-words leading-snug">テニプリ キャラクター年齢比較ダッシュボード</h1>
+            <p className="text-[10px] sm:text-xs opacity-80 mt-1">デジタル庁ダッシュボードデザイン 実践ガイドブック準拠</p>
           </div>
           
-          <div className="flex items-center gap-6">
+          <div className="flex flex-wrap items-center gap-3 sm:gap-6 w-full sm:w-auto">
             {/* 年齢入力 (直接入力) */}
-            <div className="flex items-center gap-3">
-              <label htmlFor="user-age" className="text-base font-bold whitespace-nowrap">あなたの年齢:</label>
+            <div className="flex items-center gap-2 sm:gap-3">
+              <label htmlFor="user-age" className="text-sm sm:text-base font-bold whitespace-nowrap">あなたの年齢:</label>
               <div className="relative flex items-center">
                 <input
                   id="user-age"
                   type="number"
-                  className="w-24 px-3 py-1.5 rounded-lg bg-white text-brand-500 text-lg font-black focus:outline-none focus:ring-4 focus:ring-brand-200 transition-all border-2 border-brand-100 focus:border-brand-400"
+                  className="w-20 sm:w-24 px-2 sm:px-3 py-1.5 rounded-lg bg-white text-brand-500 text-base sm:text-lg font-black focus:outline-none focus:ring-4 focus:ring-brand-200 transition-all border-2 border-brand-100 focus:border-brand-400"
                   placeholder="--"
                   value={userProfile.age ?? ''}
                   onChange={(e) => setUserProfile(prev => ({ ...prev, age: e.target.value ? parseInt(e.target.value) : null }))}
                 />
-                <span className="ml-2 text-sm font-bold opacity-90 whitespace-nowrap">歳</span>
+                <span className="ml-1.5 sm:ml-2 text-sm font-bold opacity-90 whitespace-nowrap">歳</span>
               </div>
             </div>
 
             {/* 詳細プロフィールボタン */}
             <button
               onClick={() => setIsProfileOpen(true)}
-              className="px-3 py-1.5 bg-brand-400/20 text-white rounded-lg font-bold border border-white/30 hover:bg-brand-400/40 transition-colors text-sm flex items-center gap-2"
+              className="px-3 py-1.5 bg-brand-400/20 text-white rounded-lg font-bold border border-white/30 hover:bg-brand-400/40 transition-colors text-xs sm:text-sm flex items-center gap-1.5 sm:gap-2"
               title="学校・身長・体重・家族などを設定"
             >
-              👤 詳細プロフィール設定
+              👤 <span className="hidden sm:inline">詳細</span>プロフィール設定
             </button>
           </div>
         </header>
 
-        {/* Sidebar / Filter Area (Rows 2-6, Col 1) */}
-        <aside className="col-span-1 row-span-5 border-r border-brand-100 bg-brand-100/30 p-4 flex flex-col gap-6">
+        {/* SP: フィルタートグルボタン */}
+        <button
+          className="lg:hidden flex items-center justify-between w-full px-4 py-2.5 bg-brand-100/50 border-b border-brand-100 text-sm font-bold text-brand-500 active:bg-brand-100 transition-colors"
+          onClick={() => setFilterOpen(!filterOpen)}
+        >
+          <span className="flex items-center gap-2">
+            🔍 フィルター
+            {activeFilterCount > 0 && (
+              <span className="bg-brand-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full min-w-[18px] text-center">
+                {activeFilterCount}
+              </span>
+            )}
+          </span>
+          <span className="text-xs">{filterOpen ? '▲' : '▼'}</span>
+        </button>
+
+        {/* Sidebar / Filter Area */}
+        <aside className={`${filterOpen ? 'block' : 'hidden'} lg:block lg:col-span-1 lg:row-span-1 border-b lg:border-b-0 lg:border-r border-brand-100 bg-brand-100/30 p-4 flex flex-col gap-4 lg:gap-6`}>
           <div>
             <h2 className="text-xs font-bold text-brand-500 uppercase tracking-wider mb-3">絞り込み</h2>
             
@@ -118,7 +138,7 @@ export default function Dashboard() {
               {/* 学校フィルター */}
               <div className="flex flex-col gap-1">
                 <span className="text-[10px] text-gray-500 font-bold uppercase">学校</span>
-                <div className="flex flex-col gap-1 max-h-40 overflow-y-auto pr-1">
+                <div className="flex flex-wrap lg:flex-col gap-1.5 lg:gap-1 max-h-40 overflow-y-auto pr-1">
                   {schools.map(school => (
                     <label key={school} className="flex items-center gap-2 text-xs cursor-pointer hover:text-brand-500">
                       <input
@@ -156,7 +176,7 @@ export default function Dashboard() {
               {/* 年齢ポジション */}
               <div className="flex flex-col gap-1">
                 <span className="text-[10px] text-gray-500 font-bold uppercase">表示順位</span>
-                <div className="flex flex-col gap-1">
+                <div className="flex flex-wrap lg:flex-col gap-2 lg:gap-1">
                   {[
                     { id: 'all', label: 'すべて' },
                     { id: 'same', label: '同い年のみ' },
@@ -184,22 +204,21 @@ export default function Dashboard() {
           </div>
         </aside>
 
-        {/* Main Content Area (Rows 2-6, Cols 2-6) */}
-        <main className="col-span-5 row-span-5 p-6 bg-gray-50/30 overflow-auto">
-          {/* グリッドレイアウト内部のコンテンツ (次セッションで実装) */}
-          <div className="grid grid-cols-5 grid-rows-5 gap-4 h-full">
+        {/* Main Content Area */}
+        <main className="lg:col-span-5 lg:row-span-1 p-3 sm:p-4 lg:p-6 bg-gray-50/30 lg:overflow-auto flex-none lg:flex-1">
+          <div className="flex flex-col lg:grid lg:grid-cols-5 gap-4 lg:h-full">
             {/* 重要指標 (KPIカード Area) */}
-            <div className="col-span-2 row-span-2">
+            <div className="lg:col-span-2 lg:row-span-2">
               <SummaryCards characters={filteredByScope} userAge={userProfile.age} />
             </div>
 
             {/* チャートエリア */}
-            <div className="col-span-3 row-span-2">
+            <div className="lg:col-span-3 lg:row-span-2 min-h-[280px] sm:min-h-[300px] min-w-0">
               <Charts characters={filteredByScope} userAge={userProfile.age} />
             </div>
 
             {/* キャラクターリスト */}
-            <div className="col-span-5 row-span-3 overflow-hidden">
+            <div className="lg:col-span-5 lg:row-span-3 min-w-0 lg:overflow-hidden">
               <CharacterTable characters={filteredCharacters} userProfile={userProfile} />
             </div>
           </div>

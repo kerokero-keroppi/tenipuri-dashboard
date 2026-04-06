@@ -38,8 +38,8 @@ export default function UserProfileModal({ isOpen, onClose, profile, setProfile 
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 overflow-y-auto">
-      <div className="bg-white rounded-lg shadow-xl w-full max-w-2xl m-4 border border-brand-200 flex flex-col max-h-[90vh]">
+    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/50 overflow-y-auto">
+      <div className="bg-white rounded-t-lg sm:rounded-lg shadow-xl w-full sm:max-w-2xl sm:m-4 border border-brand-200 flex flex-col max-h-[85vh] sm:max-h-[90vh]">
         <div className="p-4 border-b border-brand-100 flex justify-between items-center bg-brand-50 rounded-t-lg">
           <h2 className="text-xl font-bold text-brand-500">あなたのプロフィール設定</h2>
           <button onClick={onClose} className="text-gray-400 hover:text-gray-600 font-bold p-1">

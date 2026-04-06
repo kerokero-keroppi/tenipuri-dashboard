@@ -34,9 +34,9 @@ export default function SummaryCards({ characters, userAge }: SummaryCardsProps)
     }
   }
 
-  const cardStyle = "bg-white rounded-lg border border-brand-100 shadow-sm p-4 flex flex-col justify-center transition-all hover:bg-brand-50/30";
+  const cardStyle = "bg-white rounded-lg border border-brand-100 shadow-sm p-3 sm:p-4 flex flex-col justify-center transition-all hover:bg-brand-50/30";
   const labelStyle = "text-[10px] sm:text-xs text-gray-500 font-bold mb-1 uppercase tracking-wider";
-  const valueStyle = "text-xl sm:text-2xl font-bold text-brand-500 leading-none";
+  const valueStyle = "text-lg sm:text-xl md:text-2xl font-bold text-brand-500 leading-none";
   const unitStyle = "text-[10px] text-gray-400 ml-1 font-normal";
 
   return (
@@ -58,8 +58,8 @@ export default function SummaryCards({ characters, userAge }: SummaryCardsProps)
             </div>
           </div>
         ) : (
-          <div className="flex items-center h-4 text-center justify-center py-4">
-             <p className="text-sm text-gray-400">
+          <div className="flex items-center text-center justify-center py-4 min-h-[3rem]">
+             <p className="text-sm text-gray-400 break-words leading-relaxed">
                 年齢を入力すると、具体的な比較結果が表示されます。
              </p>
           </div>

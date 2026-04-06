@@ -4,7 +4,7 @@ export default function Home() {
   return (
     <div className="flex flex-col min-h-screen bg-dashboard-bg text-gray-900 font-sans">
       <main className="flex-grow w-full max-w-[1920px] mx-auto p-0 sm:p-4 lg:p-8 flex flex-col">
-         <div className="w-full h-full lg:aspect-[16/9] flex flex-col flex-grow">
+         <div className="w-full lg:h-full lg:aspect-[16/9] flex flex-col flex-grow">
            <Dashboard />
          </div>
       </main>
