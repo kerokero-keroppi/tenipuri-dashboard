@@ -1,26 +1,48 @@
 @import "tailwindcss";
 
+@config "../../tailwind.config.ts";
+
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --background: hsl(240, 33%, 98%);
+  --foreground: hsl(222, 47%, 11%);
+  
+  /* デジタル庁ガイドライン セマンティックカラー */
+  --color-brand-100: hsl(215, 100%, 95%);
+  --color-brand-200: hsl(226, 100%, 77%);
+  --color-brand-300: hsl(226, 96%, 60%);
+  --color-brand-400: hsl(232, 100%, 48%);
+  --color-brand-500: hsl(232, 100%, 38%);
+  
+  --color-highlight: var(--color-brand-300);
+  --color-danger: hsl(0, 99%, 61%);
+  --color-dashboard-bg: var(--background);
 }
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+  --font-sans: "Inter", "Noto Sans JP", ui-sans-serif, system-ui, sans-serif;
+  
+  --color-brand-100: var(--color-brand-100);
+  --color-brand-200: var(--color-brand-200);
+  --color-brand-300: var(--color-brand-300);
+  --color-brand-400: var(--color-brand-400);
+  --color-brand-500: var(--color-brand-500);
+  
+  --color-highlight: var(--color-highlight);
+  --color-danger: var(--color-danger);
+  --color-dashboard-bg: var(--color-dashboard-bg);
 }
 
 body {
-  background: var(--background);
+  background: var(--color-dashboard-bg);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-sans);
+  @apply antialiased;
+}
+
+/* 16:9比率を意識したコンテナ */
+.dashboard-container {
+  aspect-ratio: 16 / 9;
+  width: 100%;
+  max-width: 1920px;
+  margin: 0 auto;
 }

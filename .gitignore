@@ -20,10 +20,6 @@
 # production
 /build
 
-# misc
-.DS_Store
-*.pem
-
 # debug
 npm-debug.log*
 yarn-debug.log*
@@ -39,3 +35,24 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# agents-sdk / multi-agent flow logs
+.agents/logs/
+.agents/*.md
+!.agents/prompts/
+!.agents/templates/
+!.agents/skills/
+
+# local env files
+.env*.local
+
+# IDEs
+.vscode/
+.idea/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Private keys / Certificates
+*.pem
