@@ -5,10 +5,22 @@ import { characters } from '../data/characters';
 import SummaryCards from './SummaryCards';
 import CharacterTable from './CharacterTable';
 import Charts from './Charts';
+import UserProfileModal, { UserProfile } from './UserProfileModal';
 
 export default function Dashboard() {
-  // ユーザーの年齢ステート
-  const [age, setAge] = useState<number | null>(null);
+  // ユーザーのプロファイルステート
+  const [userProfile, setUserProfile] = useState<UserProfile>({
+    age: null,
+    school: '',
+    grade: '',
+    height: null,
+    weight: null,
+    bloodType: '',
+    dominantArm: '',
+    family: [],
+    familyOther: ''
+  });
+  const [isProfileOpen, setIsProfileOpen] = useState(false);
 
   // 定数の抽出
   const schools = useMemo(() => Array.from(new Set(characters.map(c => c.school))), []);
@@ -36,15 +48,15 @@ export default function Dashboard() {
       const gradeMatch = filters.grade.length === 0 || filters.grade.includes(char.grade);
       
       let ageMatch = true;
-      if (age !== null) {
-        if (filters.position === 'above') ageMatch = char.ageCurrent > age;
-        else if (filters.position === 'below') ageMatch = char.ageCurrent < age;
-        else if (filters.position === 'same') ageMatch = char.ageCurrent === age;
+      if (userProfile.age !== null) {
+        if (filters.position === 'above') ageMatch = char.ageCurrent > userProfile.age;
+        else if (filters.position === 'below') ageMatch = char.ageCurrent < userProfile.age;
+        else if (filters.position === 'same') ageMatch = char.ageCurrent === userProfile.age;
       }
       
       return schoolMatch && gradeMatch && ageMatch;
     });
-  }, [filters.school, filters.grade, filters.position, age]);
+  }, [filters.school, filters.grade, filters.position, userProfile.age]);
 
   // ハンドラー
   const toggleFilter = (type: 'school' | 'grade', value: string) => {
@@ -69,19 +81,31 @@ export default function Dashboard() {
             <p className="text-xs opacity-80">デジタル庁ダッシュボードデザイン 実践ガイドブック準拠</p>
           </div>
           
-          <div className="flex items-center gap-3">
-            <label htmlFor="user-age" className="text-base font-bold whitespace-nowrap">あなたの年齢:</label>
-            <div className="relative flex items-center">
-              <input
-                id="user-age"
-                type="number"
-                className="w-32 px-4 py-2 rounded-lg bg-white text-brand-500 text-xl font-black focus:outline-none focus:ring-4 focus:ring-brand-200 transition-all border-2 border-brand-100 focus:border-brand-400"
-                placeholder="--"
-                value={age ?? ''}
-                onChange={(e) => setAge(e.target.value ? parseInt(e.target.value) : null)}
-              />
-              <span className="ml-2 text-sm font-bold opacity-90 whitespace-nowrap">歳</span>
+          <div className="flex items-center gap-6">
+            {/* 年齢入力 (直接入力) */}
+            <div className="flex items-center gap-3">
+              <label htmlFor="user-age" className="text-base font-bold whitespace-nowrap">あなたの年齢:</label>
+              <div className="relative flex items-center">
+                <input
+                  id="user-age"
+                  type="number"
+                  className="w-24 px-3 py-1.5 rounded-lg bg-white text-brand-500 text-lg font-black focus:outline-none focus:ring-4 focus:ring-brand-200 transition-all border-2 border-brand-100 focus:border-brand-400"
+                  placeholder="--"
+                  value={userProfile.age ?? ''}
+                  onChange={(e) => setUserProfile(prev => ({ ...prev, age: e.target.value ? parseInt(e.target.value) : null }))}
+                />
+                <span className="ml-2 text-sm font-bold opacity-90 whitespace-nowrap">歳</span>
+              </div>
             </div>
+
+            {/* 詳細プロフィールボタン */}
+            <button
+              onClick={() => setIsProfileOpen(true)}
+              className="px-3 py-1.5 bg-brand-400/20 text-white rounded-lg font-bold border border-white/30 hover:bg-brand-400/40 transition-colors text-sm flex items-center gap-2"
+              title="学校・身長・体重・家族などを設定"
+            >
+              👤 詳細プロフィール設定
+            </button>
           </div>
         </header>
 
@@ -166,20 +190,28 @@ export default function Dashboard() {
           <div className="grid grid-cols-5 grid-rows-5 gap-4 h-full">
             {/* 重要指標 (KPIカード Area) */}
             <div className="col-span-2 row-span-2">
-              <SummaryCards characters={filteredByScope} userAge={age} />
+              <SummaryCards characters={filteredByScope} userAge={userProfile.age} />
             </div>
 
             {/* チャートエリア */}
             <div className="col-span-3 row-span-2">
-              <Charts characters={filteredByScope} userAge={age} />
+              <Charts characters={filteredByScope} userAge={userProfile.age} />
             </div>
 
             {/* キャラクターリスト */}
             <div className="col-span-5 row-span-3 overflow-hidden">
-              <CharacterTable characters={filteredCharacters} userAge={age} />
+              <CharacterTable characters={filteredCharacters} userProfile={userProfile} />
             </div>
           </div>
         </main>
+
+        {/* Modal */}
+        <UserProfileModal
+          isOpen={isProfileOpen}
+          onClose={() => setIsProfileOpen(false)}
+          profile={userProfile}
+          setProfile={setUserProfile}
+        />
 
       </div>
     </div>

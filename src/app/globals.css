@@ -39,10 +39,18 @@ body {
   @apply antialiased;
 }
 
-/* 16:9比率を意識したコンテナ */
+/* ダッシュボードコンテナ */
 .dashboard-container {
-  aspect-ratio: 16 / 9;
   width: 100%;
   max-width: 1920px;
   margin: 0 auto;
+  min-height: 100vh;
+}
+
+/* PCのみ16:9比率を意識 */
+@media (min-width: 1024px) {
+  .dashboard-container {
+    aspect-ratio: 16 / 9;
+    min-height: auto;
+  }
 }
