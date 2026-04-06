@@ -9,99 +9,157 @@ import {
   CartesianGrid,
   Tooltip,
   ResponsiveContainer,
+  Cell,
+  LabelList
 } from 'recharts';
 import { Character } from '../data/characters';
 
 interface ChartsProps {
   characters: Character[];
+  userAge?: number | null;
 }
 
-export default function Charts({ characters }: ChartsProps) {
-  // 学校別データの集計
-  const schoolData = useMemo(() => {
-    const schools = Array.from(new Set(characters.map((c) => c.school)));
-    return schools
-      .map((school) => ({
-        name: school,
-        count: characters.filter((c) => c.school === school).length,
-      }))
-      .sort((a, b) => b.count - a.count); // 人数が多い順
-  }, [characters]);
+// カスタムラベルのためのコンポーネント (吹き出し)
+const CustomTooltipBadge = (props: any) => {
+  const { x, y, width, value } = props; // value is boolean (isUser)
+  if (!value) return null;
+  
+  const radius = 4;
+  const boxWidth = 72;
+  const boxHeight = 22;
+  const arrowSize = 5;
+  
+  // Barの中央のX座標
+  const centerX = x + width / 2;
+  // BoxTopのY座標 (Barの上)
+  const boxY = y - boxHeight - arrowSize - 2;
+  
+  return (
+    <g>
+      {/* 吹き出しの背景 */}
+      <rect
+        x={centerX - boxWidth / 2}
+        y={boxY}
+        width={boxWidth}
+        height={boxHeight}
+        fill="#EF4444" // 赤 (アクセントカラー)
+        rx={radius}
+        ry={radius}
+      />
+      {/* 吹き出しの矢印（下向きの三角形） */}
+      <polygon
+        points={`
+          ${centerX - arrowSize},${boxY + boxHeight} 
+          ${centerX + arrowSize},${boxY + boxHeight} 
+          ${centerX},${boxY + boxHeight + arrowSize}
+        `}
+        fill="#EF4444"
+      />
+      {/* 吹き出しのテキスト */}
+      <text
+        x={centerX}
+        y={boxY + boxHeight / 2 + 3}
+        fill="#FFFFFF"
+        textAnchor="middle"
+        fontSize="10px"
+        fontWeight="bold"
+      >
+        あなたの年齢
+      </text>
+    </g>
+  );
+};
 
-  // 年齢別データの集計 (12歳〜15歳)
+export default function Charts({ characters, userAge }: ChartsProps) {
+  // 年齢別データの集計
   const ageData = useMemo(() => {
-    const ages = [12, 13, 14, 15];
-    return ages.map((age) => ({
-      name: `${age}歳`,
-      count: characters.filter((c) => c.ageCurrent === age).length,
-    }));
-  }, [characters]);
+    // 存在する全キャラクターの年齢のセット
+    const charAges = characters.map(c => c.ageCurrent);
+    
+    // min と max の決定
+    let allAges = [...charAges];
+    if (userAge !== null && userAge !== undefined) {
+      allAges.push(userAge);
+    }
+    
+    // データがない場合は空配列
+    if (allAges.length === 0) return [];
+    
+    const minAge = Math.min(...allAges);
+    const maxAge = Math.max(...allAges);
+    
+    // 最小から最大まですべての年齢を配列化し、存在しない年齢も0としてマッピングする
+    // これにより年齢が大きく離れている場合、隙間がしっかりと空いて距離感を認識しやすくなる。
+    const data = [];
+    for (let currentAge = minAge; currentAge <= maxAge; currentAge++) {
+      data.push({
+        name: `${currentAge}歳`,
+        count: characters.filter(c => c.ageCurrent === currentAge).length,
+        isUser: currentAge === userAge,
+      });
+    }
+    return data;
+  }, [characters, userAge]);
 
-  // デジタル庁ガイドラインを意識した配色 (ブランドカラー)
   const brandColor = 'var(--color-brand-300)';
+  const accentColor = '#EF4444'; // Tailwind text-red-500
   const gridColor = '#E5E7EB'; // gray-200
   const labelStyle = { fontSize: '10px', fill: '#6B7280' }; // gray-500
 
+  // ユーザーの年齢が大きく離れている場合、ツールチップのフォーマットなどを変更する機能
+  const CustomTooltip = ({ active, payload, label }: any) => {
+    if (active && payload && payload.length) {
+      const data = payload[0].payload;
+      return (
+        <div className="bg-white p-2 border border-gray-200 rounded shadow-sm text-xs">
+          <p className="font-bold text-gray-700">{label}</p>
+          <p className="text-brand-500">キャラクター: {data.count} 人</p>
+          {data.isUser && (
+            <p className="text-red-500 font-bold mt-1">あなたの年齢</p>
+          )}
+        </div>
+      );
+    }
+    return null;
+  };
+
   return (
     <div className="flex flex-col gap-4 h-full">
-      {/* 2つのグラフを横に並べる (グリッドに収めるため) */}
-      <div className="grid grid-cols-2 gap-4 h-full">
-        {/* 学校別キャラクター数 */}
-        <div className="bg-white p-4 rounded-lg border border-brand-100 shadow-sm flex flex-col h-full">
-          <h3 className="text-xs font-bold text-gray-700 mb-4 border-l-4 border-brand-400 pl-2">
-            学校別キャラクター数
-          </h3>
-          <div className="flex-1 w-full min-h-[140px]">
-            <ResponsiveContainer width="100%" height="100%">
-              <BarChart
-                data={schoolData}
-                layout="vertical"
-                margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
-              >
-                <CartesianGrid strokeDasharray="3 3" horizontal={false} stroke={gridColor} />
-                <XAxis type="number" hide />
-                <YAxis
-                  dataKey="name"
-                  type="category"
-                  width={70}
-                  tick={labelStyle}
-                  axisLine={false}
-                  tickLine={false}
-                />
-                <Tooltip
-                  cursor={{ fill: 'rgba(var(--color-brand-100), 0.2)' }}
-                  contentStyle={{ fontSize: '12px', borderRadius: '4px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }}
-                />
-                <Bar dataKey="count" fill={brandColor} radius={[0, 4, 4, 0]} barSize={12} />
-              </BarChart>
-            </ResponsiveContainer>
-          </div>
-        </div>
-
-        {/* 年齢分布 */}
-        <div className="bg-white p-4 rounded-lg border border-brand-100 shadow-sm flex flex-col h-full">
-          <h3 className="text-xs font-bold text-gray-700 mb-4 border-l-4 border-brand-400 pl-2">
-            年齢分布（人）
-          </h3>
-          <div className="flex-1 w-full min-h-[140px]">
-            <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={ageData} margin={{ top: 5, right: 10, left: -20, bottom: 0 }}>
-                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke={gridColor} />
-                <XAxis
-                  dataKey="name"
-                  tick={labelStyle}
-                  axisLine={{ stroke: gridColor }}
-                  tickLine={false}
-                />
-                <YAxis tick={labelStyle} axisLine={false} tickLine={false} />
-                <Tooltip
-                  cursor={{ fill: 'rgba(var(--color-brand-100), 0.1)' }}
-                  contentStyle={{ fontSize: '12px', borderRadius: '4px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }}
-                />
-                <Bar dataKey="count" fill={brandColor} radius={[4, 4, 0, 0]} barSize={30} />
-              </BarChart>
-            </ResponsiveContainer>
-          </div>
+      {/* 年齢分布を画面全体に表示 */}
+      <div className="bg-white p-4 rounded-lg border border-brand-100 shadow-sm flex flex-col h-full w-full">
+        <h3 className="text-xs font-bold text-gray-700 mb-4 border-l-4 border-brand-400 pl-2 flex justify-between">
+          <span>年齢分布（人）</span>
+          {userAge !== null && userAge !== undefined && (
+            <span className="text-gray-400 font-normal">
+              緑はキャラクター、赤はあなたの年齢
+            </span>
+          )}
+        </h3>
+        <div className="flex-1 w-full min-h-[160px] pt-8"> {/* 吹き出しのために上部に余白を確保 */}
+          <ResponsiveContainer width="100%" height="100%">
+            <BarChart data={ageData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+              <CartesianGrid strokeDasharray="3 3" vertical={false} stroke={gridColor} />
+              <XAxis
+                dataKey="name"
+                tick={labelStyle}
+                axisLine={{ stroke: gridColor }}
+                tickLine={false}
+                minTickGap={-100} // 大きすぎると省略されてしまうためマイナスにして全表示しやすくする
+              />
+              <YAxis tick={labelStyle} axisLine={false} tickLine={false} allowDecimals={false} />
+              <Tooltip
+                cursor={{ fill: 'rgba(var(--color-brand-100), 0.1)' }}
+                 content={<CustomTooltip />}
+              />
+              <Bar dataKey="count" radius={[4, 4, 0, 0]} barSize={24} minPointSize={userAge ? 2 : 0}>
+                {ageData.map((entry, index) => (
+                  <Cell key={`cell-${index}`} fill={entry.isUser ? accentColor : brandColor} />
+                ))}
+                {/* 吹き出しを表示 */}
+                <LabelList dataKey="isUser" content={<CustomTooltipBadge />} />
+              </Bar>
+            </BarChart>
+          </ResponsiveContainer>
         </div>
       </div>
     </div>

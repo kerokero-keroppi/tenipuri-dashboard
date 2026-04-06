@@ -18,6 +18,22 @@ export default function SummaryCards({ characters, userAge }: SummaryCardsProps)
   const younger = userAge !== null ? characters.filter(c => c.ageCurrent < userAge).length : 0;
   const total = characters.length;
 
+  // 平均年齢差の計算
+  let averageDiffText = "--";
+  let averageDiffValue = null;
+  if (userAge !== null && total > 0) {
+    const totalAge = characters.reduce((sum, c) => sum + c.ageCurrent, 0);
+    const avgAge = totalAge / total;
+    averageDiffValue = Math.abs(avgAge - userAge).toFixed(1);
+    if (userAge > avgAge) {
+      averageDiffText = `平均より 約${averageDiffValue}歳 年上`;
+    } else if (userAge < avgAge) {
+      averageDiffText = `平均より 約${averageDiffValue}歳 年下`;
+    } else {
+      averageDiffText = `平均と ほぼ同い年`;
+    }
+  }
+
   const cardStyle = "bg-white rounded-lg border border-brand-100 shadow-sm p-4 flex flex-col justify-center transition-all hover:bg-brand-50/30";
   const labelStyle = "text-[10px] sm:text-xs text-gray-500 font-bold mb-1 uppercase tracking-wider";
   const valueStyle = "text-xl sm:text-2xl font-bold text-brand-500 leading-none";
@@ -25,7 +41,28 @@ export default function SummaryCards({ characters, userAge }: SummaryCardsProps)
 
   return (
     <div className="grid grid-cols-2 grid-rows-2 gap-3 h-full">
-      {/* Total Count */}
+      {/* 比較結果メッセージ (横全体を使用) */}
+      <div className={`col-span-2 ${cardStyle} bg-brand-50/50 border-brand-200 justify-start`}>
+        <span className={labelStyle}>年齢比較サマリ</span>
+        {userAge !== null ? (
+          <div className="flex flex-col gap-2 mt-1">
+            <p className="text-sm font-medium text-gray-700 leading-snug">
+              あなたより年下のキャラクターは <span className="text-red-500 font-bold text-lg">{younger}</span> 人います。
+            </p>
+            <p className="text-xs text-gray-600 bg-white p-2 rounded border border-gray-200 shadow-sm w-fit">
+              全体と比べて、あなたは <span className="font-bold text-brand-600">{averageDiffText}</span> です。
+            </p>
+          </div>
+        ) : (
+          <div className="flex items-center h-full text-center justify-center">
+             <p className="text-sm text-gray-400">
+                右上から年齢を入力すると、<br />具体的な比較結果が表示されます。
+             </p>
+          </div>
+        )}
+      </div>
+
+      {/* 表示対象 */}
       <div className={cardStyle}>
         <span className={labelStyle}>表示対象</span>
         <div className="flex items-baseline">
@@ -34,34 +71,12 @@ export default function SummaryCards({ characters, userAge }: SummaryCardsProps)
         </div>
       </div>
 
-      {/* Same Age */}
+      {/* 同い年 */}
       <div className={cardStyle}>
         <span className={labelStyle}>同い年</span>
         <div className="flex items-baseline">
           <span className={`${valueStyle} ${userAge !== null && sameAge > 0 ? 'text-brand-400' : 'text-gray-300'}`}>
             {userAge === null ? '--' : sameAge}
-          </span>
-          <span className={unitStyle}>人</span>
-        </div>
-      </div>
-
-      {/* Older */}
-      <div className={cardStyle}>
-        <span className={labelStyle}>年上</span>
-        <div className="flex items-baseline">
-          <span className={`${valueStyle} ${userAge !== null ? (older > 0 ? 'text-highlight' : 'text-brand-500') : 'text-gray-300'}`}>
-            {userAge === null ? '--' : older}
-          </span>
-          <span className={unitStyle}>人</span>
-        </div>
-      </div>
-
-      {/* Younger */}
-      <div className={cardStyle}>
-        <span className={labelStyle}>年下</span>
-        <div className="flex items-baseline">
-          <span className={`${valueStyle} ${userAge !== null ? (younger > 0 ? 'text-danger' : 'text-brand-500') : 'text-gray-300'}`}>
-            {userAge === null ? '--' : younger}
           </span>
           <span className={unitStyle}>人</span>
         </div>

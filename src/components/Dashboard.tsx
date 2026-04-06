@@ -69,16 +69,19 @@ export default function Dashboard() {
             <p className="text-xs opacity-80">デジタル庁ダッシュボードデザイン 実践ガイドブック準拠</p>
           </div>
           
-          <div className="flex items-center gap-4">
-            <label htmlFor="user-age" className="text-sm font-medium">あなたの年齢:</label>
-            <input
-              id="user-age"
-              type="number"
-              className="w-20 px-2 py-1 rounded bg-white text-brand-500 text-sm font-bold focus:outline-none focus:ring-2 focus:ring-brand-300"
-              placeholder="歳"
-              value={age ?? ''}
-              onChange={(e) => setAge(e.target.value ? parseInt(e.target.value) : null)}
-            />
+          <div className="flex items-center gap-3">
+            <label htmlFor="user-age" className="text-base font-bold whitespace-nowrap">あなたの年齢:</label>
+            <div className="relative flex items-center">
+              <input
+                id="user-age"
+                type="number"
+                className="w-32 px-4 py-2 rounded-lg bg-white text-brand-500 text-xl font-black focus:outline-none focus:ring-4 focus:ring-brand-200 transition-all border-2 border-brand-100 focus:border-brand-400"
+                placeholder="--"
+                value={age ?? ''}
+                onChange={(e) => setAge(e.target.value ? parseInt(e.target.value) : null)}
+              />
+              <span className="ml-2 text-sm font-bold opacity-90 whitespace-nowrap">歳</span>
+            </div>
           </div>
         </header>
 
