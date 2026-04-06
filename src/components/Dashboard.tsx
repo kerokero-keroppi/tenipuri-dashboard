@@ -168,7 +168,7 @@ export default function Dashboard() {
 
             {/* チャートエリア */}
             <div className="col-span-3 row-span-2">
-              <Charts characters={filteredByScope} />
+              <Charts characters={filteredByScope} userAge={age} />
             </div>
 
             {/* キャラクターリスト */}
